@@ -51,9 +51,11 @@ class ZipCsvGenerator:
 
         if os.path.exists(zip_dir):
             shutil.rmtree(zip_dir)
+            os.mkdir(self.zip_dir)
 
         if os.path.exists(csv_dir):
             shutil.rmtree(csv_dir)
+            os.mkdir(self.csv_dir)
 
         logger.info(f'Класс {self.__class__.__name__} инициализирован')
 
@@ -79,9 +81,6 @@ class ZipCsvGenerator:
 
         for xml_idx in range(100):
             pretty_xml = self.generate_xml()
-
-            if not os.path.exists(self.zip_dir):
-                os.mkdir(self.zip_dir)
 
             with ZipFile(zip_out_path, 'a') as myzip:
                 xml_file_name = f'{xml_idx}.xml'
@@ -175,9 +174,6 @@ class ZipCsvGenerator:
                     object_name_list = [el['@name'] for el in obj_names]
                 else:
                     object_name_list = [obj_names['@name']]
-
-                if not os.path.exists(self.csv_dir):
-                    os.mkdir(self.csv_dir)
 
                 data = [[var_id[0], object_name] for object_name in object_name_list]
 
