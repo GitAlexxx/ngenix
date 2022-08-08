@@ -1,0 +1,5 @@
+csv_dir/
+zip_dir/
+venv/
+__pycache__/
+.idea/
