@@ -23,10 +23,13 @@ class ZipCsvGenerator:
         self.zip_dir = zip_dir
         self.csv_dir = csv_dir
 
-        shutil.rmtree(zip_dir)
-        shutil.rmtree(csv_dir)
+        if os.path.exists(zip_dir):
+            shutil.rmtree(zip_dir)
 
-        logger.info(f'Класс {ZipCsvGenerator.__name__} инициализирован')
+        if os.path.exists(csv_dir):
+            shutil.rmtree(csv_dir)
+
+        logger.info(f'Класс {self.__class__.__name__} инициализирован')
 
     def generate_zip_files(self, count: int) -> None:
         """
