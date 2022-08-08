@@ -4,9 +4,12 @@ import os.path
 import random
 import shutil
 import string
+import time
 import xml.etree.ElementTree as ET
 import zipfile
 from datetime import datetime
+from functools import wraps
+from typing import Callable
 from zipfile import ZipFile
 
 import lxml.etree
@@ -14,6 +17,26 @@ import xmltodict
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def timer(func: Callable) -> Callable:
+    """
+    Декоратор для измерения времени выполнения функции
+
+    :param func: декорируемая функция
+    :return:
+    """
+
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        logger.debug(f"Запуск '{func.__name__}'")
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        logger.debug(f"Завершение '{func.__name__}', время работы: {round(end - start, 3)} сек.")
+        return result
+
+    return wrapped
 
 
 class ZipCsvGenerator:
@@ -97,6 +120,7 @@ class ZipCsvGenerator:
 
         return pretty_xml
 
+    @timer
     def generate_csv_files(self) -> None:
         """
         Разбор сгенерированных zip-файлов и запись их в csv-файлы.
