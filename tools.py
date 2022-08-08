@@ -1,5 +1,6 @@
 import csv
 import logging
+import multiprocessing
 import os.path
 import random
 import shutil
@@ -33,7 +34,7 @@ def timer(func: Callable) -> Callable:
         start = time.time()
         result = func(*args, **kwargs)
         end = time.time()
-        logger.debug(f"Завершение '{func.__name__}', время работы: {round(end - start, 3)} сек.")
+        logger.info(f"Завершение '{func.__name__}', время работы: {round(end - start, 3)} сек.")
         return result
 
     return wrapped
@@ -45,6 +46,8 @@ class ZipCsvGenerator:
     def __init__(self, zip_dir: str, csv_dir: str):
         self.zip_dir = zip_dir
         self.csv_dir = csv_dir
+        self.csv_1 = []
+        self.csv_2 = []
 
         if os.path.exists(zip_dir):
             shutil.rmtree(zip_dir)
@@ -130,34 +133,13 @@ class ZipCsvGenerator:
 
         zip_files = os.listdir(self.zip_dir)
 
-        csv_1 = []
-        csv_2 = []
+        # используем multiprocessing для ускорения обработки
+        with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+            results = pool.map(self.task, zip_files)
 
-        for zip_file in zip_files:
-            file_path = os.path.join(self.zip_dir, zip_file)
-            if zipfile.is_zipfile(file_path):
-                archive = zipfile.ZipFile(file_path, 'r')
-                xml_list = archive.filelist
-                for xml in xml_list:
-                    xml_str = archive.read(xml.filename).decode('utf8')
-                    xml_dict = xmltodict.parse(xml_str)
-
-                    var_id = [el['@value'] for el in xml_dict['root']['var'] if el['@name'] == 'id']
-                    var_level = [el['@value'] for el in xml_dict['root']['var'] if el['@name'] == 'level']
-
-                    obj_names = xml_dict['root']['objects']['object']
-                    if isinstance(obj_names, list):
-                        object_name_list = [el['@name'] for el in obj_names]
-                    else:
-                        object_name_list = [obj_names['@name']]
-
-                    if not os.path.exists(self.csv_dir):
-                        os.mkdir(self.csv_dir)
-
-                    data = [[var_id[0], object_name] for object_name in object_name_list]
-
-                    csv_1.append([var_id[0], var_level[0]])
-                    csv_2.extend(data)
+        for result in results:
+            self.csv_1.append(result[0])
+            self.csv_2.extend(result[1])
 
         csv_1_path = os.path.join(self.csv_dir, 'csv_1.csv')
         csv_2_path = os.path.join(self.csv_dir, 'csv_2.csv')
@@ -166,12 +148,37 @@ class ZipCsvGenerator:
         with open(csv_1_path, 'a', encoding='UTF8', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(header)
-            writer.writerows(csv_1)
+            writer.writerows(self.csv_1)
         logger.info(f'csv_1.csv сгенерирован')
 
         header = ['id', 'object_name']
         with open(csv_2_path, 'a', encoding='UTF8', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(header)
-            writer.writerows(csv_2)
+            writer.writerows(self.csv_2)
         logger.info(f'csv_2.csv сгенерирован')
+
+    def task(self, zip_file):
+        file_path = os.path.join(self.zip_dir, zip_file)
+        if zipfile.is_zipfile(file_path):
+            archive = zipfile.ZipFile(file_path, 'r')
+            xml_list = archive.filelist
+            for xml in xml_list:
+                xml_str = archive.read(xml.filename).decode('utf8')
+                xml_dict = xmltodict.parse(xml_str)
+
+                var_id = [el['@value'] for el in xml_dict['root']['var'] if el['@name'] == 'id']
+                var_level = [el['@value'] for el in xml_dict['root']['var'] if el['@name'] == 'level']
+
+                obj_names = xml_dict['root']['objects']['object']
+                if isinstance(obj_names, list):
+                    object_name_list = [el['@name'] for el in obj_names]
+                else:
+                    object_name_list = [obj_names['@name']]
+
+                if not os.path.exists(self.csv_dir):
+                    os.mkdir(self.csv_dir)
+
+                data = [[var_id[0], object_name] for object_name in object_name_list]
+
+                return [var_id[0], var_level[0]], data
