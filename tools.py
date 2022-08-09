@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 from datetime import datetime
 from functools import wraps
-from typing import Callable
+from typing import Callable, Tuple
 from zipfile import ZipFile
 
 import lxml.etree
@@ -25,7 +25,7 @@ def timer(func: Callable) -> Callable:
     Декоратор для измерения времени выполнения функции
 
     :param func: декорируемая функция
-    :return:
+    :return: задекорированная функция
     """
 
     @wraps(func)
@@ -96,16 +96,16 @@ class ZipCsvGenerator:
 
         :return: отформатированный текстовый xml-файл
         """
+        # <var name=’id’
+        rand_num = str(random.randint(0, 100))
 
+        # value=’<случайное уникальное строковое значение>’/>
         uniq_str = str(datetime.today().timestamp()).replace('.', '')
-
         rand_uniq_str = ''.join(
             random.choice(
                 string.ascii_uppercase + string.digits
             ) for _ in range(10)
         ) + uniq_str
-
-        rand_num = str(random.randint(0, 100))
 
         root = ET.Element('root')
         ET.SubElement(root, "var", name="id", value=rand_uniq_str)
@@ -113,7 +113,9 @@ class ZipCsvGenerator:
 
         objects = ET.SubElement(root, "objects")
         for _ in range(random.randint(1, 10)):
+            # <object name=’<случайное строковое значение>’/>
             rand_str = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(50))
+
             ET.SubElement(objects, "object", name=rand_str)
 
         xml_str = ET.tostring(root, encoding="utf8", method="xml")
@@ -157,7 +159,16 @@ class ZipCsvGenerator:
             writer.writerows(self.csv_2)
         logger.info(f'csv_2.csv сгенерирован')
 
-    def task(self, zip_file):
+    def task(self, zip_file: str) -> Tuple:
+        """
+        Функция разбора xml-файлов в архиве + извлечение данных
+
+        :param zip_file: название zip-архива
+        :return кортеж с данными для выходных csv-файлов:
+                1) id, level - по одной строке на каждый xml файл
+                2) id, object_name - по отдельной строке для каждого тэга object
+        """
+
         file_path = os.path.join(self.zip_dir, zip_file)
         if zipfile.is_zipfile(file_path):
             archive = zipfile.ZipFile(file_path, 'r')

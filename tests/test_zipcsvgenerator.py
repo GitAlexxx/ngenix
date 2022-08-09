@@ -5,7 +5,7 @@ import unittest
 from tools import ZipCsvGenerator
 
 
-class TestDecrypt(unittest.TestCase):
+class TestZipCsvGenerator(unittest.TestCase):
     def setUp(self):
         self.zip_dir = 'zip_dir'
         self.csv_dir = 'csv_dir'
