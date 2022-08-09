@@ -3,7 +3,7 @@ from tools import ZipCsvGenerator
 if __name__ == '__main__':
     zip_dir = 'zip_dir'
     csv_dir = 'csv_dir'
-    zip_count = 1
+    zip_count = 50
 
     zcg = ZipCsvGenerator(zip_dir, csv_dir)
 

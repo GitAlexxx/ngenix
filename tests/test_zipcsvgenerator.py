@@ -6,7 +6,7 @@ from tools import ZipCsvGenerator
 
 
 class TestDecrypt(unittest.TestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         self.zip_dir = 'zip_dir'
         self.csv_dir = 'csv_dir'
 
@@ -23,6 +23,4 @@ class TestDecrypt(unittest.TestCase):
         with open('xml_template.txt', 'r') as rin:
             xml_reg_template = re.compile(rin.read())
 
-            matched = re.search(xml_reg_template, xml)
-
-            self.assertTrue(matched)
+            self.assertRegex(xml, xml_reg_template)
