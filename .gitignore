@@ -3,3 +3,4 @@ zip_dir/
 venv/
 __pycache__/
 .idea/
+tests/.pytest_cache/

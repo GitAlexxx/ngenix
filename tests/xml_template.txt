@@ -1,0 +1,1 @@
+<root>\s+<var name=\"id\" value=\"\w+\"/>  <var name=\"level\" value=\"\d+\"/>\s+<objects>(?:\s+<object name=\"\w+\"/>)+\s+</objects></root>
