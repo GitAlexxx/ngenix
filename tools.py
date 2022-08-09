@@ -116,9 +116,9 @@ class ZipCsvGenerator:
             rand_str = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(50))
             ET.SubElement(objects, "object", name=rand_str)
 
-        xml_str = ET.tostring(root, encoding="utf-8", method="xml")
+        xml_str = ET.tostring(root, encoding="utf8", method="xml")
         tree = lxml.etree.fromstring(xml_str)
-        pretty_xml = lxml.etree.tostring(tree, encoding="unicode", pretty_print=True)
+        pretty_xml = lxml.etree.tostring(tree, encoding="utf8", pretty_print=True)
 
         return pretty_xml
 
@@ -144,14 +144,14 @@ class ZipCsvGenerator:
         csv_2_path = os.path.join(self.csv_dir, 'csv_2.csv')
 
         header = ['id', 'level']
-        with open(csv_1_path, 'a', encoding='UTF8', newline='') as f:
+        with open(csv_1_path, 'a', encoding='utf8', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(header)
             writer.writerows(self.csv_1)
         logger.info(f'csv_1.csv сгенерирован')
 
         header = ['id', 'object_name']
-        with open(csv_2_path, 'a', encoding='UTF8', newline='') as f:
+        with open(csv_2_path, 'a', encoding='utf8', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(header)
             writer.writerows(self.csv_2)
