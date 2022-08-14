@@ -9,3 +9,5 @@ if __name__ == '__main__':
 
     zcg.generate_zip_files(zip_count)
     zcg.generate_csv_files()
+
+    token = 'test32432234dqcwdw'
