@@ -11,3 +11,4 @@ if __name__ == '__main__':
     zcg.generate_csv_files()
 
     token = 'test32432234dqcwdw'
+    token_2 = 'test32432234dqcwdw'
